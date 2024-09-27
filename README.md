@@ -7,6 +7,55 @@
   
 - **팀원**  
  박지우, 김효은
+
+## **프로세스 구조**
+
+### 1. **계좌 생성 프로세스**
+1. **`BankingSystem::createAccount`** 호출
+    - 계좌번호 중복 검사 (`BankingSystem::hasAccount`)
+    - 중복이 없다면, `std::make_shared<Account>`로 새로운 계좌 객체 생성 및 `accountMap`에 추가
+    - **`Account::Account`** 생성자 호출
+    - **`BankingSystem::saveData`** 호출로 계좌 정보 저장
+
+### 2. **입금 프로세스**
+1. **`BankingSystem::deposit`** 호출
+    - 계좌 유효성 검사 (`BankingSystem::getAccount`)
+    - **`BankingSystem::updateAccountBalance`** 호출
+        - 계좌 객체 조회 (`BankingSystem::getAccount`)
+        - **`Account::deposit`** 호출로 입금 처리
+        - **`BankingSystem::logTransaction`** 호출로 입금 로그 기록
+        - **`BankingSystem::saveData`** 호출로 변경된 계좌 정보 저장
+
+### 3. **출금 프로세스**
+1. **`BankingSystem::withdraw`** 호출
+    - 계좌 유효성 검사 (`BankingSystem::getAccount`)
+    - **`BankingSystem::updateAccountBalance`** 호출
+        - 계좌 객체 조회 (`BankingSystem::getAccount`)
+        - **`Account::withdraw`** 호출로 출금 처리
+        - 출금 실패 시 **`BankingSystem::logErrTransaction`** 호출
+        - 출금 성공 시 **`BankingSystem::logTransaction`** 호출로 출금 로그 기록
+        - **`BankingSystem::saveData`** 호출로 변경된 계좌 정보 저장
+
+### 4. **잔액 조회 프로세스**
+1. **`BankingSystem::showBalance`** 호출
+    - **`BankingSystem::getBalanceForAccount`** 호출
+        - 계좌 객체 조회 (`BankingSystem::getAccount`)
+        - **`Account::getBalance`** 호출로 잔액 반환
+
+### 5. **모든 계좌 정보 표시 프로세스**
+1. **`BankingSystem::showAllAccounts`** 호출
+    - **`Account::showAccInfo`** 호출
+        - **`QFile`**을 통해 `accountData.txt`에서 계좌 정보 로드
+        - **`QMessageBox`**를 통해 모든 계좌 정보 출력
+
+### 6. **계좌 데이터 로드 및 저장 프로세스**
+1. **`BankingSystem::loadData`** 호출
+    - **`QFile`**을 통해 `accountData.txt` 파일에서 계좌 정보 로드
+    - **`std::make_shared<Account>`로 계좌 객체 생성 및 `accountMap`에 추가
+2. **`BankingSystem::saveData`** 호출
+    - **`QFile`**을 통해 `accountData.txt` 파일에 모든 계좌 정보 저장
+    - **`Account::getAccountNumber`**, **`Account::getName`**, **`Account::getBalance`** 호출로 계좌 정보 가져오기
+
   
 ## **프로젝트 구조**  
     - main.cpp: 애플리케이션의 시작 지점입니다.  
